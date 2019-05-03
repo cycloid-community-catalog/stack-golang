@@ -1,0 +1,20 @@
+name: 'Go tests'
+canonical: 'stack-golang'
+description: 'Create pipeline with go to test Go repositories'
+image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-golang/master/icon.jpg'
+keywords:
+  - 'golang'
+  - 'tests'
+  - 'cycloid'
+technologies:
+  - technology: 'golang'
+    version: 'n/a'
+author: 'Cycloid'
+type: 'stack'
+config:
+  # Configuration of the CI pipeline
+  pipeline:
+    pipeline:
+      path: 'pipeline/pipeline.yml'
+    variables:
+          path: 'pipeline/variables.sample.yml'

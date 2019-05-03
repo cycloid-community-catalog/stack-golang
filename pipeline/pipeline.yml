@@ -1,0 +1,143 @@
+shared:
+  # Task : run unit tests
+  - &run-unit-tests
+    args:
+    - '-ec'
+    - |
+      export GOPATH=${PWD}/go
+      cd code
+      ((script))
+
+groups:
+- name: tests
+  jobs:
+  - test-pr
+  - test-((branch))
+
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+- name: report-github-status
+  type: docker-image
+  source:
+    # Use cycloid one because of https://github.com/dpb587/github-status-resource/pull/2
+    # repository: dpb587/github-status-resource
+    # tag: master
+    # repository: cycloid/github-status-resource
+    repository: cycloid/github-status-resource
+
+resources:
+  - name: report-status-((branch))
+    type: report-github-status
+    source:
+      access_token: ((github-access-token))
+      branch: ((branch))
+      repository: ((github-repo-name))
+
+  - name: pull-request
+    type: pull-request
+    source:
+      uri: ((github-repo-uri))
+      repo: ((github-repo-name))
+      access_token: ((github-access-token))
+      private_key: ((github-private-key))
+      base_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME'
+
+  - name: git_repo-((branch))
+    type: git
+    source:
+      uri: ((github-repo-uri))
+      branch: ((branch))
+      private_key: ((github-private-key))
+
+jobs:
+  - name: test-pr
+    max_in_flight: 1
+    build_logs_to_retain: 20
+    serial: true
+    plan:
+      - get: pull-request
+        resource: pull-request
+        trigger: true
+        version: every
+
+      - put: pull-request
+        params:
+          context: ((ci-context))
+          path: pull-request
+          status: pending
+
+      - task: unit-tests
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ((docker-image))
+              tag: ((docker-image-tag))
+          run:
+            path: /bin/bash
+            <<: *run-unit-tests
+          inputs:
+            - name: pull-request
+              path: code
+          caches:
+            - path: ((go-path-cache))
+        on_failure:
+          put: pull-request
+          params:
+            context: ((ci-context))
+            path: pull-request
+            status: failure
+        on_success:
+          put: pull-request
+          params:
+            context: ((ci-context))
+            path: pull-request
+            status: success
+
+  - name: test-((branch))
+    build_logs_to_retain: 20
+    max_in_flight: 1
+    plan:
+      - get: ((branch))
+        resource: git_repo-((branch))
+        trigger: true
+
+      - task: unit-tests
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: ((docker-image))
+              tag: ((docker-image-tag))
+          run:
+            path: /bin/bash
+            <<: *run-unit-tests
+          inputs:
+            - name: ((branch))
+              path: code
+          caches:
+            - path: ((go-path-cache))
+        on_success:
+          try:
+            put: report-status-((branch))
+            params:
+              commit: ((branch))
+              context: molecule-test
+              state: success
+              target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+        on_failure:
+          try:
+            put: report-status-((branch))
+            params:
+              commit: ((branch))
+              context: molecule-test
+              state: failure
+              target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
