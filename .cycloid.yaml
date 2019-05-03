@@ -1,6 +1,6 @@
 name: 'Go tests'
 canonical: 'stack-golang'
-description: 'Create pipeline with go to test Go repositories'
+description: 'This stack will allow you to run golang tests'
 image: 'https://raw.githubusercontent.com/cycloid-community-catalog/stack-golang/master/icon.jpg'
 keywords:
   - 'golang'
