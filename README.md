@@ -26,7 +26,7 @@ No requirements
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|
 |`customer`|Name of the Cycloid Organization, used as customer variable name.|`-`|`($ organization_canonical $)`|`True`|
 |`project`|Name of the project.|`-`|`($ project $)`|`True`|
-|`ci-context`|Name of the ci context.|`-`|`golang-test`|`True`|
+|`ci-context`|A context to use for the status.|`-`|`golang-test`|`True`|
 |`github-repo-uri`|Git repository url.|`-`|`git@github.com:cycloidio/terraforming.git`|`True`|
 |`github-repo-name:`|Name of the git repository.|`-`|`cycloidio/terraforming`|`True`|
 |`github-access-token`|Github token used for commits and pr notifications.|`-`|`($ github_access_token.data $)`|`True`|
