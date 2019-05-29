@@ -1,4 +1,17 @@
 shared:
+  # Params: pull request params
+  - &pull-request-params
+    base_context: cycloid-ci
+    context: ((ci_context))
+    target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+    description: 'cycloid-ci build %s'
+
+  # Params: report github status params
+  - &report-github-status-params
+    commit: ((branch))
+    context: ((ci_context))
+    target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+
   # Task : run unit tests
   - &run-unit-tests
     args:
@@ -9,16 +22,20 @@ shared:
       ((script))
 
 groups:
-- name: tests
+- name: pull-request
   jobs:
-  - test-pr
-  - test-((branch))
+    - test-pr
+- name: ship
+  jobs:
+    - test-((branch))
+    - publish-docker-image-((branch))
 
 resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: jtarchie/pr
+    repository: teliaoss/github-pr-resource
+    tag: dev
 
 - name: report-github-status
   type: docker-image
@@ -29,34 +46,49 @@ resource_types:
     # repository: cycloid/github-status-resource
     repository: cycloid/github-status-resource
 
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
 resources:
   - name: report-status-((branch))
     type: report-github-status
     source:
-      access_token: ((github-access-token))
+      access_token: ((git_access_token))
       branch: ((branch))
-      repository: ((github-repo-name))
+      repository: ((git_repository_name))
 
   - name: pull-request
     type: pull-request
     source:
-      uri: ((github-repo-uri))
-      repo: ((github-repo-name))
-      access_token: ((github-access-token))
-      private_key: ((github-private-key))
-      base_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME'
+      access_token: ((github_access_token.data))
+      repository: ((git_repository_name))
 
   - name: git_repo-((branch))
     type: git
     source:
-      uri: ((github-repo-uri))
+      uri: ((git_repository))
       branch: ((branch))
-      private_key: ((github-private-key))
+      private_key: ((git_private_key))
+
+  - name: ((project))-docker-image
+    type: docker-image
+    source:
+      username: ((docker_hub_username))
+      password: ((docker_hub_password))
+      repository: ((docker_hub_repository))
+
+  - name: slack-alert
+    type: slack-notification
+    source:
+      url: ((slack_webhook_url))
 
 jobs:
   - name: test-pr
     max_in_flight: 1
-    build_logs_to_retain: 20
+    build_logs_to_retain: 10
     serial: true
     plan:
       - get: pull-request
@@ -66,7 +98,7 @@ jobs:
 
       - put: pull-request
         params:
-          context: ((ci-context))
+          <<: *pull-request-params
           path: pull-request
           status: pending
 
@@ -77,8 +109,8 @@ jobs:
           image_resource:
             type: docker-image
             source:
-              repository: ((docker-image))
-              tag: ((docker-image-tag))
+              repository: ((docker_image))
+              tag: ((docker_image_tag))
           run:
             path: /bin/bash
             <<: *run-unit-tests
@@ -86,22 +118,22 @@ jobs:
             - name: pull-request
               path: code
           caches:
-            - path: ((go-path-cache))
+            - path: ((go_path_cache))
         on_failure:
           put: pull-request
           params:
-            context: ((ci-context))
+            <<: *pull-request-params
             path: pull-request
             status: failure
         on_success:
           put: pull-request
           params:
-            context: ((ci-context))
+            <<: *pull-request-params
             path: pull-request
             status: success
 
   - name: test-((branch))
-    build_logs_to_retain: 20
+    build_logs_to_retain: 10
     max_in_flight: 1
     plan:
       - get: ((branch))
@@ -115,8 +147,8 @@ jobs:
           image_resource:
             type: docker-image
             source:
-              repository: ((docker-image))
-              tag: ((docker-image-tag))
+              repository: ((docker_image))
+              tag: ((docker_image_tag))
           run:
             path: /bin/bash
             <<: *run-unit-tests
@@ -124,20 +156,66 @@ jobs:
             - name: ((branch))
               path: code
           caches:
-            - path: ((go-path-cache))
+            - path: ((go_path_cache))
         on_success:
           try:
             put: report-status-((branch))
             params:
-              commit: ((branch))
-              context: molecule-test
+              <<: *report-github-status-params
               state: success
-              target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
         on_failure:
           try:
             put: report-status-((branch))
             params:
-              commit: ((branch))
-              context: molecule-test
+              <<: *report-github-status-params
               state: failure
-              target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+
+  - name: publish-docker-image-((branch))
+    build_logs_to_retain: 20
+    max_in_flight: 1
+    serial: true
+    plan:
+      - get: ((branch))
+        resource: git_repo-((branch))
+        trigger: true
+        passed: [ test-((branch)) ]
+      - put: ((project))-docker-image
+        params:
+          build: ((branch))
+          tag_as_latest: true
+    on_failure:
+      do:
+        - put: slack-alert
+          params:
+            attachments:
+              - author_link: (( slack_author_link ))
+                author_name: (( slack_author_name ))
+                color: danger
+                fallback: 'end - BUILD and PUBLISH of ((project)) image [FAIL]'
+                fields:
+                  - short: true
+                    title: Project
+                    value: ((project))
+                  - short: true
+                    title: Environment
+                    value: ((env))
+                title: '[FAIL]'
+                title_link: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+    on_success:
+      do:
+        - put: slack-alert
+          params:
+            attachments:
+              - author_link: (( slack_author_link ))
+                author_name: (( slack_author_name ))
+                color: good
+                fallback: 'end - BUILD and PUBLISH of ((project)) image [SUCCESS]'
+                fields:
+                  - short: true
+                    title: Project
+                    value: ((project))
+                  - short: true
+                    title: Environment
+                    value: ((env))
+                title: '[SUCCESS]'
+                title_link: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
