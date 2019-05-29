@@ -13,8 +13,8 @@ shared:
     target_url: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
 
   - &slack-alert
-    author_link: (( slack_author_link ))
-    author_name: (( slack_author_name ))
+    author_link: ((slack_author_link))
+    author_name: ((slack_author_name))
     title_link: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
     fields:
       - short: true
