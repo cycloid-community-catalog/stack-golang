@@ -38,9 +38,9 @@ docker_hub_password: ((docker-hub.password))
 # Slack
 #
 
-#. slack_webhook_url (required): (( slack_webbook.url ))
+#. slack_webhook_url (required): ((slack_webhook.url))
 #+ Webhook post url.
-slack_webhook_url: (( slack_webbook.url ))
+slack_webhook_url: ((slack_webhook.url))
 
 #. slack_author_link (required): 'https://example.com/'
 #+ Webhook author link.

@@ -31,7 +31,7 @@ No requirements
 |`docker_hub_repository`|Docker Hub repository name.|`-`|`MyUser/MyRepo`|`True`|
 |`docker_hub_username`|Docker Hub username.|`-`|`((docker-hub.username))`|`True`|
 |`docker_hub_password`|Docker Hub password.|`-`|`((docker-hub.password))`|`True`|
-|`slack_webhook_url`|Webhook post url.|`-`|`(( slack_webbook.url ))`|`True`|
+|`slack_webhook_url`|Webhook post url.|`-`|`((slack_webhook.url))`|`True`|
 |`slack_author_link`|Webhook author link.|`-`|`https://example.com/`|`True`|
 |`slack_author_name`|Webhook author name.|`-`|`example`|`True`|
 |`env`|Name of the project's environment.|`-`|`($ environment $)`|`True`|

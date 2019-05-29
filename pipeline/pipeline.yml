@@ -3,14 +3,26 @@ shared:
   - &pull-request-params
     base_context: cycloid-ci
     context: ((ci_context))
-    target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+    target_url: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
     description: 'cycloid-ci build %s'
 
   # Params: report github status params
   - &report-github-status-params
     commit: ((branch))
     context: ((ci_context))
-    target_url: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
+    target_url: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+
+  - &slack-alert
+    author_link: (( slack_author_link ))
+    author_name: (( slack_author_name ))
+    title_link: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+    fields:
+      - short: true
+        title: Project
+        value: ((project))
+      - short: true
+        title: Environment
+        value: ((env))
 
   # Task : run unit tests
   - &run-unit-tests
@@ -188,34 +200,16 @@ jobs:
         - put: slack-alert
           params:
             attachments:
-              - author_link: (( slack_author_link ))
-                author_name: (( slack_author_name ))
+              - <<: *slack-alert
                 color: danger
                 fallback: 'end - BUILD and PUBLISH of ((project)) image [FAIL]'
-                fields:
-                  - short: true
-                    title: Project
-                    value: ((project))
-                  - short: true
-                    title: Environment
-                    value: ((env))
                 title: '[FAIL]'
-                title_link: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
     on_success:
       do:
         - put: slack-alert
           params:
             attachments:
-              - author_link: (( slack_author_link ))
-                author_name: (( slack_author_name ))
+              - <<: *slack-alert
                 color: good
                 fallback: 'end - BUILD and PUBLISH of ((project)) image [SUCCESS]'
-                fields:
-                  - short: true
-                    title: Project
-                    value: ((project))
-                  - short: true
-                    title: Environment
-                    value: ((env))
                 title: '[SUCCESS]'
-                title_link: 'https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID'
