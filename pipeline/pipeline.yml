@@ -34,6 +34,11 @@ shared:
       ((script))
 
 groups:
+- name: overview
+  jobs:
+    - test-pr
+    - test-((branch))
+    - publish-docker-image-((branch))
 - name: pull-request
   jobs:
     - test-pr
