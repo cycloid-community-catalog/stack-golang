@@ -12,7 +12,7 @@ git_repository_name: MyUser/MyRepo
 
 #. git_access_token (required): ((git_github_access_token.data))
 #+ Github token to fetch repo source code.
-git_access_token: ((git_github_access_token.data))
+git_access_token: ((github_access_token.data))
 
 #. git_private_key (required): ((git_github.ssh_key))
 #+ SSH key pair to fetch repor source code.

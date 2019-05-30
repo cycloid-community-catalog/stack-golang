@@ -9,7 +9,7 @@ shared:
   # Params: report github status params
   - &report-github-status-params
     commit: ((branch))
-    context: ((ci_context))
+    context: cycloid-ci/((ci_context))
     target_url: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
 
   - &slack-alert
@@ -46,8 +46,8 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: teliaoss/github-pr-resource
-    tag: dev
+    repository: adriagalin/github-pr-resource
+    tag: rc3
 
 - name: report-github-status
   type: docker-image
