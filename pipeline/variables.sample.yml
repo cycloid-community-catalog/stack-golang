@@ -26,13 +26,13 @@ git_private_key: ((git_github.ssh_key))
 #+ Docker Hub repository name.
 docker_hub_repository: MyUser/MyRepo
 
-#. docker_hub_username (required): ((docker-hub.username))
+#. docker_hub_username (required): ((docker_hub.username))
 #+ Docker Hub username.
-docker_hub_username: ((docker-hub.username))
+docker_hub_username: ((docker_hub.username))
 
-#. docker_hub_password (required): ((docker-hub.password))
+#. docker_hub_password (required): ((docker_hub.password))
 #+ Docker Hub password.
-docker_hub_password: ((docker-hub.password))
+docker_hub_password: ((docker_hub.password))
 
 #
 # Slack
@@ -49,6 +49,18 @@ slack_author_link: 'https://example.com/'
 #. slack_author_name (required): example
 #+ Webhook author name.
 slack_author_name: example
+
+#
+# Events
+#
+
+#. cyclobot_account_login (required): ((cycloid_bot_account.login))
+#+ Cycloid bot account login.
+cycloid_bot_account_login: ((cycloid_bot_account.login))
+
+#. cyclobot_account_password (required): ((cycloid_bot_account.password))
+#+ Cycloid bot account password.
+cycloid_bot_account_password: ((cycloid_bot_account.password))
 
 #
 # Default variables that shouldn't be changed except if needed

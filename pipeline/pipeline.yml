@@ -64,6 +64,13 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: cycloid-events
+  type: docker-image
+  source:
+    repository: cycloid/cycloid-events-resource
+    tag: latest
+  privileged: false
+
 resources:
   - name: report-status-((branch))
     type: report-github-status
@@ -96,6 +103,22 @@ resources:
     type: slack-notification
     source:
       url: ((slack_webhook_url))
+
+  - name: cycloid-events
+    type: cycloid-events
+    source:
+      api_login: ((cycloid_bot_account_login))
+      api_password: ((cycloid_bot_account_password))
+      api_url: 'https://http-api.cycloid.io'
+      icon: fa-code-branch
+      organization: ((customer))
+      severity: info
+      type: Custom
+      tags:
+        - key: project
+          value: ((project))
+        - key: env
+          value: ((env))
 
 jobs:
   - name: test-pr
@@ -204,6 +227,16 @@ jobs:
                 color: danger
                 fallback: 'end - BUILD and PUBLISH of ((project)) image [FAIL]'
                 title: '[FAIL]'
+        - put: cycloid-events
+          params:
+            severity: critical
+            message: |
+                    A new build image of ((project)) has failed on ((env)) environment
+                    </br>
+                    <ul>
+                    <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                    </ul>
+            title: Fail build image of ((project)) on ((env)) environment
     on_success:
       do:
         - put: slack-alert
@@ -213,3 +246,12 @@ jobs:
                 color: good
                 fallback: 'end - BUILD and PUBLISH of ((project)) image [SUCCESS]'
                 title: '[SUCCESS]'
+        - put: cycloid-events
+          params:
+            message: |
+                    A new build image of ((project)) has been done on ((env)) environment
+                    </br>
+                    <ul>
+                    <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                    </ul>
+            title: Success build image of ((project)) on ((env)) environment
