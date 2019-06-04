@@ -125,6 +125,17 @@ resources:
         - key: env
           value: ((env))
 
+  - name: golang-image
+    type: docker-image
+    source:
+      repository: ((docker_image))
+      tag: ((docker_image_tag))
+
+  - name: alpine-image
+    type: docker-image
+    source:
+      repository: alpine
+
 jobs:
   - name: test-pr
     max_in_flight: 1
@@ -179,7 +190,6 @@ jobs:
       - get: ((branch))
         resource: git_repo-((branch))
         trigger: true
-
       - task: unit-tests
         privileged: true
         config:
@@ -219,8 +229,19 @@ jobs:
         resource: git_repo-((branch))
         trigger: true
         passed: [ test-((branch)) ]
+      - get: golang
+        resource: golang-image
+        params:
+          save: true
+      - get: alpine
+        resource: alpine-image
+        params:
+          save: true
       - put: ((project))-docker-image
         params:
+          load_bases:
+            - golang
+            - alpine
           build: ((branch))
           tag_as_latest: true
     on_failure:
