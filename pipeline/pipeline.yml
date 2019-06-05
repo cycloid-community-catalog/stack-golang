@@ -225,59 +225,60 @@ jobs:
     max_in_flight: 1
     serial: true
     plan:
-      - get: ((branch))
-        resource: git_repo-((branch))
-        trigger: true
-        passed: [ test-((branch)) ]
-      - get: golang
-        resource: golang-image
-        params:
-          save: true
-      - get: alpine
-        resource: alpine-image
-        params:
-          save: true
-      - put: ((project))-docker-image
-        params:
-          load_bases:
-            - golang
-            - alpine
-          build: ((branch))
-          tag_as_latest: true
-    on_failure:
-      do:
-        - put: slack-alert
-          params:
-            attachments:
-              - <<: *slack-alert
-                color: danger
-                fallback: 'end - BUILD and PUBLISH of ((project)) image [FAIL]'
-                title: '[FAIL]'
-        - put: cycloid-events
-          params:
-            severity: critical
-            message: |
-                    A new build image of ((project)) has failed on ((env)) environment
-                    </br>
-                    <ul>
-                    <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
-                    </ul>
-            title: Fail build image of ((project)) on ((env)) environment
-    on_success:
-      do:
-        - put: slack-alert
-          params:
-            attachments:
-              - <<: *slack-alert
-                color: good
-                fallback: 'end - BUILD and PUBLISH of ((project)) image [SUCCESS]'
-                title: '[SUCCESS]'
-        - put: cycloid-events
-          params:
-            message: |
-                    A new build image of ((project)) has been done on ((env)) environment
-                    </br>
-                    <ul>
-                    <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
-                    </ul>
-            title: Success build image of ((project)) on ((env)) environment
+      - do:
+          - get: ((branch))
+            resource: git_repo-((branch))
+            trigger: true
+            passed: [ test-((branch)) ]
+          - get: golang
+            resource: golang-image
+            params:
+              save: true
+          - get: alpine
+            resource: alpine-image
+            params:
+              save: true
+          - put: ((project))-docker-image
+            params:
+              load_bases:
+                - golang
+                - alpine
+              build: ((branch))
+              tag_as_latest: true
+        on_failure:
+          do:
+            - put: slack-alert
+              params:
+                attachments:
+                  - <<: *slack-alert
+                    color: danger
+                    fallback: 'end - BUILD and PUBLISH of ((project)) image [FAIL]'
+                    title: '[FAIL]'
+            - put: cycloid-events
+              params:
+                severity: critical
+                message: |
+                        A new build image of ((project)) has failed on ((env)) environment
+                        </br>
+                        <ul>
+                        <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                        </ul>
+                title: Fail build image of ((project)) on ((env)) environment
+        on_success:
+          do:
+          - put: slack-alert
+            params:
+              attachments:
+                - <<: *slack-alert
+                  color: good
+                  fallback: 'end - BUILD and PUBLISH of ((project)) image [SUCCESS]'
+                  title: '[SUCCESS]'
+          - put: cycloid-events
+            params:
+              message: |
+                      A new build image of ((project)) has been done on ((env)) environment
+                      </br>
+                      <ul>
+                      <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                      </ul>
+              title: Success build image of ((project)) on ((env)) environment
