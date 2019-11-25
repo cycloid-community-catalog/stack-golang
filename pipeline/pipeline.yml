@@ -3,19 +3,19 @@ shared:
   - &pull-request-params
     base_context: cycloid-ci
     context: ((ci_context))
-    target_url: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+    target_url: https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
     description: 'cycloid-ci build %s'
 
   # Params: report github status params
   - &report-github-status-params
     commit: ((branch))
     context: cycloid-ci/((ci_context))
-    target_url: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+    target_url: https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
 
   - &slack-alert
     author_link: ((slack_author_link))
     author_name: ((slack_author_name))
-    title_link: https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
+    title_link: https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID
     fields:
       - short: true
         title: Project
@@ -261,7 +261,7 @@ jobs:
                         A new build image of ((project)) has failed on ((env)) environment
                         </br>
                         <ul>
-                        <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                        <li><em><a href="https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
                         </ul>
                 title: Fail build image of ((project)) on ((env)) environment
         on_success:
@@ -279,6 +279,6 @@ jobs:
                       A new build image of ((project)) has been done on ((env)) environment
                       </br>
                       <ul>
-                      <li><em><a href="https://console.cycloid.io/projects/((customer))/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
+                      <li><em><a href="https://console.cycloid.io/organizations/((customer))/projects/((project))/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_ID">Build link</a></em></li>
                       </ul>
               title: Success build image of ((project)) on ((env)) environment
