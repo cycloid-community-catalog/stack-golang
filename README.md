@@ -27,7 +27,7 @@ No requirements
 |`git_repository`|Git repository URL containing the config of the stack.|`-`|`git@github.com:MyUser/MyRepo.git`|`True`|
 |`git_repository_name`|Git repository name.|`-`|`MyUser/MyRepo`|`True`|
 |`git_access_token`|Github token to fetch repo source code.|`-`|`((github_access_token.data))`|`True`|
-|`git_private_key`|SSH key pair to fetch repor source code.|`-`|`((git_github.ssh_key))`|`True`|
+|`git_private_key`|SSH key pair to fetch repor source code.|`-`|`((ssh_github.ssh_key))`|`True`|
 |`docker_hub_repository`|Docker Hub repository name.|`-`|`MyUser/MyRepo`|`True`|
 |`docker_hub_username`|Docker Hub username.|`-`|`((docker_hub.username))`|`True`|
 |`docker_hub_password`|Docker Hub password.|`-`|`((docker_hub.password))`|`True`|
