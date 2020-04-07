@@ -10,13 +10,13 @@ git_repository: git@github.com:MyUser/MyRepo.git
 #+ Git repository name.
 git_repository_name: MyUser/MyRepo
 
-#. git_access_token (required): ((git_github_access_token.data))
+#. git_access_token (required): ((ssh_github_access_token.data))
 #+ Github token to fetch repo source code.
 git_access_token: ((github_access_token.data))
 
-#. git_private_key (required): ((git_github.ssh_key))
+#. git_private_key (required): ((ssh_github.ssh_key))
 #+ SSH key pair to fetch repor source code.
-git_private_key: ((git_github.ssh_key))
+git_private_key: ((ssh_github.ssh_key))
 
 #
 # Docker Hub
