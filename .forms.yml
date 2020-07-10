@@ -1,0 +1,117 @@
+---
+default:
+  pipeline:
+    Repos:
+      - name: "Code git URL"
+        description: "URL to the Git repository containing source code."
+        key: git_repository
+        widget: simple_text
+        type: string
+        default: "git@github.com:MyUser/code.git"
+      - name: "Github repository name"
+        description: "Name of the github repository"
+        key: git_repository_name
+        widget: simple_text
+        type: string
+        default: "MyUser/MyRepo"
+      - name: "Code git branch"
+        description: "Branch of the source code Git repository."
+        key: branch
+        widget: simple_text
+        type: string
+        default: "master"
+      - name: "Code git key"
+        description: "SSH key pair to fetch source code Git repository."
+        key: git_private_key
+        type: string
+        widget: cy_cred
+        default: "((ssh_github.ssh_key))"
+      - name: "Github access token"
+        description: "Github token to fetch repo source code."
+        key: git_private_key
+        type: string
+        widget: cy_cred
+        default: "((github_access_token.data))"
+    Dockerhub:
+      - name: "Repository name"
+        description: "Docker Hub repository name."
+        key: docker_hub_repository
+        widget: simple_text
+        type: string
+        default: "MyUser/MyRepo"
+      - name: "Hub username"
+        description: "Docker Hub username."
+        key: docker_hub_username
+        widget: cy_cred
+        type: string
+        default: "((docker_hub.username))"
+      - name: "Hub password"
+        description: "Docker Hub password."
+        key: docker_hub_password
+        widget: cy_cred
+        type: string
+        default: "((docker_hub.password))"
+    Slack:
+      - name: "Webhook url"
+        description: "Webhook post url."
+        key: slack_webhook_url
+        widget: cy_cred
+        type: string
+        default: "((slack_webhook.url))"
+      - name: "Author link"
+        description: "Webhook author link."
+        key: slack_author_link
+        widget: simple_text
+        type: string
+        default: "https://example.com/"
+      - name: "Author name"
+        description: "Webhook author name."
+        key: slack_author_name
+        widget: simple_text
+        type: string
+        default: "example"
+    Events:
+      - name: "Cyclobot account login"
+        description: "Cycloid bot account login."
+        key: cycloid_bot_account_login
+        widget: cy_cred
+        type: string
+        default: "((((cycloid_bot_account.login))"
+      - name: "Cyclobot account password"
+        description: "Cycloid bot account password."
+        key: cycloid_bot_account_password
+        widget: cy_cred
+        type: string
+        default: "((((cycloid_bot_account.password))"
+    Stack-config:
+docker_image: golang
+      - name: "Docker image"
+        description: "Docker golang image name."
+        key: docker_image
+        widget: simple_text
+        type: string
+        default: "golang"
+      - name: "Docker image tag"
+        description: "Docker golang image version/tag."
+        key: docker_image_tag
+        widget: simple_text
+        type: string
+        default: "1.12"
+      - name: "CI context"
+        description: "A context to use for the status. (Prefixed with cycloid-ci, defaults to cycloid-ci/status)."
+        key: ci_context
+        widget: simple_text
+        type: string
+        default: "golang-test"
+      - name: "Go path cache"
+        description: "Go dependencies cache path."
+        key: go_path_cache
+        widget: simple_text
+        type: string
+        default: "go/pkg/mod"
+      - name: "Script"
+        description: "Command to run the tests."
+        key: script
+        widget: simple_text
+        type: string
+        default: "go test ./..."
